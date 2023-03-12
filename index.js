@@ -1,23 +1,30 @@
 import config from './config/index.js';
-import dbConnect from './database/index.js';
+import mongoDb from './database/index.js';
 import express from 'express';
 import * as dotenv from 'dotenv';
 import bodyParser from 'body-parser';
-import userRouter from './routes/userRoutes.js';
+import authRouter from './routes/authRoutes.js';
 dotenv.config();
 
 const app = express();
 const prefix = '/api/v1';
 
-const PORT = config.PORT;
+const { PORT } = config;
 
-dbConnect();
+mongoDb()
+  .then(() => {
+    console.log('DB Connection Made');
+  })
+  .catch((error) => console.log(error));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use('/', (req, res) => {
+
+app.use(`${prefix}/user`, authRouter);
+
+app.use(`${prefix}/`, (req, res) => {
   res.send('Welcome to the beginnng on nothingness');
 });
-app.use(`${prefix}/user`, userRouter);
+
 app.listen(PORT, () => {
-  console.log(`Server is Running on Port ${PORT}`);
+  console.log(`Server Up And Running on Port ${PORT}`);
 });
