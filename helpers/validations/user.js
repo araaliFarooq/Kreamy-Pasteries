@@ -12,9 +12,18 @@ const createUserValidation = Joi.object()
       .messages({ 'string.email': 'Email must be a valid email' }),
     mobile: Joi.string().required().trim(),
     password: Joi.string()
+      .pattern(
+        new RegExp(
+          /^(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?])(?=.*\d)(?=.*[A-Z]).{7,}$/
+        )
+      )
       .required()
       .trim()
-      .pattern(new RegExp('^[a-zA-Z0-9]{3,30}$')),
+      .messages({
+        'string.pattern.base': `Password must contain at least one special character, one number, one capital letter, and should be longer than 6 characters:`,
+        'string.empty': `Password cannot be empty`,
+        'any.required': `Password is required`,
+      }),
     confirmPassword: Joi.any()
       .valid(Joi.ref('password'))
       .required()
@@ -25,7 +34,11 @@ const createUserValidation = Joi.object()
 
 const userLoginValidation = Joi.object()
   .keys({
-    email: Joi.string().email().required().trim(),
+    email: Joi.string()
+      .email()
+      .required()
+      .trim()
+      .messages({ 'string.email': 'Email must be a valid email' }),
     password: Joi.string().required().trim(),
   })
   .min(2)

@@ -13,9 +13,20 @@ export default class UserController {
     const { email, mobile } = req.body;
     try {
       const userEmailExists = await UserServices.findUser({ email });
+
       const userMobileExists = await UserServices.findUser({ mobile });
 
+      // if (userEmailExists) {
+      //   return res
+      //     .status(409)
+      //     .send({ message: `User with this email ${email} already exists ` });
+      // } else if (userMobileExists) {
+      //   return res.status(409).send({
+      //     message: `User with this Phone number ${mobile} already exists `,
+      //   });
+      // } else {
       if (userEmailExists || userMobileExists) {
+        console.log('emailee: ', userEmailExists?.email);
         const exception = userEmailExists
           ? `User with email ${email} already exists`
           : `User with phone number ${mobile} already exists`;
@@ -44,7 +55,10 @@ export default class UserController {
 
   static async LoginUser(req, res) {
     const { email, password } = req.body;
+    console.log('email: ', { email });
+    console.log('password: ', { password });
     const userExists = await UserServices.findUser({ email });
+    console.log('userExists: ', userExists);
     if (userExists) {
       const userIsVerified = userExists.isVerified;
       if (userIsVerified) {
@@ -60,6 +74,7 @@ export default class UserController {
               name: userExists.firstname + ' ' + userExists.lastname,
               email: userExists.email,
               token: token,
+              decoded_token: await TokenHandler.decodeToken(token),
             },
           });
         } else {
@@ -87,14 +102,14 @@ export default class UserController {
     }
   }
 
-  /**
-   * @param  {object} options
-   * @returns {Promise} any
-   * @description returns a single user object basing on the options
-   */
+  // /**
+  //  * @param  {object} options
+  //  * @returns {Promise} any
+  //  * @description returns a single user object basing on the options
+  //  */
   static async getOneUser(req, res) {
-    const { email } = req;
-    const user = await UserServices.findUser({ email });
+    const data = { email: req.user.email, _id: req.user.id };
+    const user = await UserServices.findUser({ data });
     if (user) {
       return res.status(200).send({ user: user });
     } else {
@@ -108,8 +123,11 @@ export default class UserController {
   //  * @description updates a single user object
   //  *@
 
-  static async updateUser(id, data) {
-    const updated = await User.update({ _id: id }, { $set: { ...data } });
-    return updated;
+  static async updateUser(req, res) {
+    const data = { ...req.body };
+    const id = req.user.id;
+    const updated = await UserServices.updateUser({ _id: id }, { ...data });
+    // User.update({ _id: id }, { $set: { ...data } });
+    return res.status(200).send({ message: updated });
   }
 }
