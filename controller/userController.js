@@ -13,18 +13,7 @@ export default class UserController {
     const { email, mobile } = req.body;
     try {
       const userEmailExists = await UserServices.findUser({ email });
-
       const userMobileExists = await UserServices.findUser({ mobile });
-
-      // if (userEmailExists) {
-      //   return res
-      //     .status(409)
-      //     .send({ message: `User with this email ${email} already exists ` });
-      // } else if (userMobileExists) {
-      //   return res.status(409).send({
-      //     message: `User with this Phone number ${mobile} already exists `,
-      //   });
-      // } else {
       if (userEmailExists || userMobileExists) {
         const exception = userEmailExists
           ? `User with email ${email} already exists`
@@ -41,23 +30,9 @@ export default class UserController {
     }
   }
 
-  // static CreateUser = asyncHandler(async (req, res) => {
-  //   const { email } = req.body;
-  //   const userExists = await User.findOne({ email: email });
-  //   if (!userExists) {
-  //     const newUser = await User.create(req.body);
-  //     return res.status(201).send({ message: 'User successfully created' });
-  //   } else {
-  //     return res.status(409).send({ message: 'User already exists' });
-  //   }
-  // });
-
   static async LoginUser(req, res) {
     const { email, password } = req.body;
-    console.log('email: ', { email });
-    console.log('password: ', { password });
     const userExists = await UserServices.findUser({ email });
-    console.log('userExists: ', userExists);
     if (userExists) {
       const userIsVerified = userExists.isVerified;
       if (userIsVerified) {
@@ -128,5 +103,33 @@ export default class UserController {
     const updated = await UserServices.updateUser({ _id: id }, { ...data });
     // User.update({ _id: id }, { $set: { ...data } });
     return res.status(200).send({ message: updated });
+  }
+
+  static async blockUser(req, res) {
+    const { id } = req.params;
+    try {
+      const blockUser = await UserServices.updateUser(id, { isBlocked: true });
+      if (blockUser) {
+        return res.status(204).send({ message: 'User successfully blocked' });
+      }
+      return res.status(400).send({ message: 'Operation not successful' });
+    } catch (error) {
+      return res.status(400).send({ message: error });
+    }
+  }
+
+  static async unBlockUser(req, res) {
+    const { id } = req.params;
+    try {
+      const unblockUser = await UserServices.updateUser(id, {
+        isBlocked: false,
+      });
+      if (unblockUser) {
+        return res.status(204).send({ message: 'User successfully unblocked' });
+      }
+      return res.status(400).send({ message: 'Operation not successful' });
+    } catch (error) {
+      return res.status(400).send({ message: error });
+    }
   }
 }

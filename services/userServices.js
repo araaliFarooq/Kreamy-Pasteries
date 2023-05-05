@@ -1,6 +1,4 @@
 import User from '../models/userModel.js';
-import asyncHandler from 'express-async-handler';
-import TokenHandler from '../helpers/tokenHandler.js';
 
 export default class UserServices {
   // /**
@@ -39,9 +37,10 @@ export default class UserServices {
   //  * @description updates a single user object
   //  *@
   static async updateUser(id, data) {
-    const updated = await User.findOneAndUpdate(
+    const updated = await User.findByIdAndUpdate(
       { _id: id },
-      { $set: { ...data } }
+      { $set: { ...data } },
+      { new: true }
     );
     return updated;
   }
