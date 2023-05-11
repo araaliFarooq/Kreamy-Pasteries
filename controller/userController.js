@@ -47,6 +47,7 @@ export default class UserController {
             data: {
               name: userExists.firstname + ' ' + userExists.lastname,
               email: userExists.email,
+              role: userExists.role,
               token: token,
               decoded_token: await TokenHandler.decodeToken(token),
             },
@@ -82,6 +83,7 @@ export default class UserController {
   //  * @description returns a single user object basing on the options
   //  */
   static async getOneUser(req, res) {
+    o;
     const data = { email: req.user.email, _id: req.user.id };
     const user = await UserServices.findUser(data);
     if (user) {
@@ -103,6 +105,32 @@ export default class UserController {
     const updated = await UserServices.updateUser({ _id: id }, { ...data });
     // User.update({ _id: id }, { $set: { ...data } });
     return res.status(200).send({ message: updated });
+  }
+
+  // @description: for admin to delete a users account
+  static async deleteUser(req, res) {
+    const { id } = req.params;
+    try {
+      const deletedUser = await UserServices.deleteUser(id);
+      return res
+        .status(200)
+        .send({ message: 'User successfully deleted', user: deletedUser });
+    } catch (error) {
+      return res.status(400).send({ message: error });
+    }
+  }
+
+  // @description: for user to deactivate their account
+  static async deactivateAccount(req, res) {
+    const { id } = req.user;
+    try {
+      const deletedUser = await UserServices.deleteUser(id);
+      return res
+        .status(200)
+        .send({ message: 'Account successfully deleted', user: deletedUser });
+    } catch (error) {
+      return res.status(400).send({ message: error });
+    }
   }
 
   static async blockUser(req, res) {

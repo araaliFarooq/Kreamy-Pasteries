@@ -38,4 +38,19 @@ userRouter.put(
   UserController.unBlockUser
 );
 
+// user deactivate their account.
+userRouter.delete(
+  '/user/profile/delete',
+  SecureRoute.loginRequired,
+  UserController.deactivateAccount
+);
+
+// admin deletes user account.
+userRouter.delete(
+  '/user/delete/:id',
+  SecureRoute.loginRequired,
+  SecureRoute.isAdmin,
+  UserController.deleteUser
+);
+
 export default userRouter;

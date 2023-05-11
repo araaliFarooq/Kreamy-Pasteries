@@ -44,4 +44,15 @@ export default class UserServices {
     );
     return updated;
   }
+
+  //
+  //  * @param {string} id: id of user object to be deleted
+  //  * @returns {Promise}
+  //  * @description deletes a single user object
+  //
+
+  static async deleteUser(id) {
+    const deletedUser = await User.findByIdAndDelete(id);
+    return deletedUser;
+  }
 }
