@@ -2,6 +2,7 @@ import User from '../models/userModel.js';
 import asyncHandler from 'express-async-handler';
 import TokenHandler from '../helpers/tokenHandler.js';
 import UserServices from '../services/userServices.js';
+import validateMongoDbId from '../helpers/userHelper.js';
 
 
 export default class UserController {
@@ -49,6 +50,7 @@ export default class UserController {
             data: {
               name: userExists.firstname + ' ' + userExists.lastname,
               email: userExists.email,
+              role: userExists.role,
               token: token,
               decoded_token: await TokenHandler.decodeToken(token),
 
@@ -86,6 +88,7 @@ export default class UserController {
   //  */
   static async getOneUser(req, res) {
     const data = { email: req.user.email, _id: req.user.id };
+    validateMongoDbId(res, data._id);
     const user = await UserServices.findUser(data);
     if (user) {
       return res.status(200).send({ user: user });
@@ -103,13 +106,43 @@ export default class UserController {
   static async updateUser(req, res) {
     const data = { ...req.body };
     const id = req.user.id;
+    validateMongoDbId(res, id);
     const updated = await UserServices.updateUser({ _id: id }, { ...data });
     // User.update({ _id: id }, { $set: { ...data } });
     return res.status(200).send({ message: updated });
   }
 
+  // @description: for admin to delete a users account
+  static async deleteUser(req, res) {
+    const { id } = req.params;
+    validateMongoDbId(res, id);
+    try {
+      const deletedUser = await UserServices.deleteUser(id);
+      return res
+        .status(200)
+        .send({ message: 'User successfully deleted', user: deletedUser });
+    } catch (error) {
+      return res.status(400).send({ message: error });
+    }
+  }
+
+  // @description: for user to deactivate their account
+  static async deactivateAccount(req, res) {
+    const { id } = req.user;
+    validateMongoDbId(res, id);
+    try {
+      const deletedUser = await UserServices.deleteUser(id);
+      return res
+        .status(200)
+        .send({ message: 'Account successfully deleted', user: deletedUser });
+    } catch (error) {
+      return res.status(400).send({ message: error });
+    }
+  }
+
   static async blockUser(req, res) {
     const { id } = req.params;
+    validateMongoDbId(res, id);
     try {
       const blockUser = await UserServices.updateUser(id, { isBlocked: true });
       if (blockUser) {

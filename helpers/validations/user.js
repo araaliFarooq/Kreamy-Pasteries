@@ -24,6 +24,7 @@ const createUserValidation = Joi.object()
         'string.empty': `Password cannot be empty`,
         'any.required': `Password is required`,
       }),
+    // Password is invalid. Must contain three of the four capital, lower, number, symbol
     confirmPassword: Joi.any()
       .valid(Joi.ref('password'))
       .required()
