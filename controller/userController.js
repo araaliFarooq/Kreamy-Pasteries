@@ -3,6 +3,7 @@ import asyncHandler from 'express-async-handler';
 import TokenHandler from '../helpers/tokenHandler.js';
 import UserServices from '../services/userServices.js';
 
+
 export default class UserController {
   /**
    * @param  {object} req.body
@@ -16,15 +17,6 @@ export default class UserController {
 
       const userMobileExists = await UserServices.findUser({ mobile });
 
-      // if (userEmailExists) {
-      //   return res
-      //     .status(409)
-      //     .send({ message: `User with this email ${email} already exists ` });
-      // } else if (userMobileExists) {
-      //   return res.status(409).send({
-      //     message: `User with this Phone number ${mobile} already exists `,
-      //   });
-      // } else {
       if (userEmailExists || userMobileExists) {
         console.log('emailee: ', userEmailExists?.email);
         const exception = userEmailExists
@@ -42,23 +34,9 @@ export default class UserController {
     }
   }
 
-  // static CreateUser = asyncHandler(async (req, res) => {
-  //   const { email } = req.body;
-  //   const userExists = await User.findOne({ email: email });
-  //   if (!userExists) {
-  //     const newUser = await User.create(req.body);
-  //     return res.status(201).send({ message: 'User successfully created' });
-  //   } else {
-  //     return res.status(409).send({ message: 'User already exists' });
-  //   }
-  // });
-
   static async LoginUser(req, res) {
     const { email, password } = req.body;
-    console.log('email: ', { email });
-    console.log('password: ', { password });
     const userExists = await UserServices.findUser({ email });
-    console.log('userExists: ', userExists);
     if (userExists) {
       const userIsVerified = userExists.isVerified;
       if (userIsVerified) {
@@ -75,6 +53,7 @@ export default class UserController {
               email: userExists.email,
               token: token,
               decoded_token: await TokenHandler.decodeToken(token),
+
             },
           });
         } else {
