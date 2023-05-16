@@ -23,4 +23,19 @@ userRouter.put(
   UserController.updateUser
 );
 
+//block and unblock use
+userRouter.put(
+  '/user/profile/block/:id',
+  SecureRoute.loginRequired,
+  SecureRoute.isAdmin,
+  UserController.blockUser
+);
+
+userRouter.put(
+  '/user/profile/unblock/:id',
+  SecureRoute.loginRequired,
+  SecureRoute.isAdmin,
+  UserController.unBlockUser
+);
+
 export default userRouter;

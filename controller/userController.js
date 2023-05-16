@@ -14,7 +14,6 @@ export default class UserController {
     const { email, mobile } = req.body;
     try {
       const userEmailExists = await UserServices.findUser({ email });
-
       const userMobileExists = await UserServices.findUser({ mobile });
 
       if (userEmailExists || userMobileExists) {
@@ -107,5 +106,33 @@ export default class UserController {
     const updated = await UserServices.updateUser({ _id: id }, { ...data });
     // User.update({ _id: id }, { $set: { ...data } });
     return res.status(200).send({ message: updated });
+  }
+
+  static async blockUser(req, res) {
+    const { id } = req.params;
+    try {
+      const blockUser = await UserServices.updateUser(id, { isBlocked: true });
+      if (blockUser) {
+        return res.status(204).send({ message: 'User successfully blocked' });
+      }
+      return res.status(400).send({ message: 'Operation not successful' });
+    } catch (error) {
+      return res.status(400).send({ message: error });
+    }
+  }
+
+  static async unBlockUser(req, res) {
+    const { id } = req.params;
+    try {
+      const unblockUser = await UserServices.updateUser(id, {
+        isBlocked: false,
+      });
+      if (unblockUser) {
+        return res.status(204).send({ message: 'User successfully unblocked' });
+      }
+      return res.status(400).send({ message: 'Operation not successful' });
+    } catch (error) {
+      return res.status(400).send({ message: error });
+    }
   }
 }
