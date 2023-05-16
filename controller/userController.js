@@ -18,7 +18,6 @@ export default class UserController {
       const userMobileExists = await UserServices.findUser({ mobile });
 
       if (userEmailExists || userMobileExists) {
-        console.log('emailee: ', userEmailExists?.email);
         const exception = userEmailExists
           ? `User with email ${email} already exists`
           : `User with phone number ${mobile} already exists`;
@@ -88,7 +87,7 @@ export default class UserController {
   //  */
   static async getOneUser(req, res) {
     const data = { email: req.user.email, _id: req.user.id };
-    const user = await UserServices.findUser({ data });
+    const user = await UserServices.findUser(data);
     if (user) {
       return res.status(200).send({ user: user });
     } else {
