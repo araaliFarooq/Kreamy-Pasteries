@@ -1,6 +1,3 @@
-import {
-  createUserValidation,
-  userLoginValidation,
-} from './validations/user.js';
+import ValidateAuth from './validations/user.js';
 
-export default { createUserValidation, userLoginValidation };
+export default ValidateAuth;

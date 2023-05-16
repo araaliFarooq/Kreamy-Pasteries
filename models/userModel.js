@@ -5,12 +5,12 @@ import bcrypt from 'bcrypt';
 var userSchema = new mongoose.Schema({
   firstname: {
     type: String,
-    required: true,
+    required: [true, 'Enter First Name'],
     trim: true,
   },
   lastname: {
     type: String,
-    required: true,
+    required: [true, 'Enter Last Name'],
     trim: true,
   },
   email: {
@@ -28,6 +28,7 @@ var userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: true,
+    minLength: [6, 'Password should be at least six characters'],
   },
   isVerified: {
     type: Boolean,
@@ -37,6 +38,13 @@ var userSchema = new mongoose.Schema({
     type: String,
     default: 'user',
   },
+
+  cart: {
+    type: Array,
+    default: [],
+  },
+  address: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Address' }],
+  wishList: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }],
   createdDate: {
     type: Date,
     default: Date.now,
@@ -52,4 +60,5 @@ userSchema.methods.isPasswordMatched = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 //Export the model
-export default mongoose.model('User', userSchema);
+const User = mongoose.model('User', userSchema);
+export default User;

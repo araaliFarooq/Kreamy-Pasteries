@@ -1,6 +1,8 @@
-import model from '../models/userModel.js';
+import User from '../models/userModel.js';
 import asyncHandler from 'express-async-handler';
 import TokenHandler from '../helpers/tokenHandler.js';
+import UserServices from '../services/userServices.js';
+
 
 export default class UserController {
   /**
@@ -8,31 +10,33 @@ export default class UserController {
    * @returns {Promise} existing user object or creates new user basing user's email
    * @description creates or returns an existing user basing on user's email
    */
-  static async CreateUser(req, res) {
-    const { email } = req.body;
-    const userExists = await model.findOne({ email });
-    if (!userExists) {
-      const newUser = await model.create(req.body);
-      return res.status(201).send({ message: 'User successfully created' });
-    } else {
-      return res.status(409).send({ message: 'User already exists' });
+  static async RegisterUser(req, res) {
+    const { email, mobile } = req.body;
+    try {
+      const userEmailExists = await UserServices.findUser({ email });
+
+      const userMobileExists = await UserServices.findUser({ mobile });
+
+      if (userEmailExists || userMobileExists) {
+        console.log('emailee: ', userEmailExists?.email);
+        const exception = userEmailExists
+          ? `User with email ${email} already exists`
+          : `User with phone number ${mobile} already exists`;
+        return res.status(409).send({ message: exception });
+      } else {
+        const newUser = await UserServices.CreateUser(req.body);
+        return res
+          .status(201)
+          .send({ message: 'User successfully created', user: newUser });
+      }
+    } catch (error) {
+      return res.status(500).send({ message: error });
     }
   }
 
-  // static CreateUser = asyncHandler(async (req, res) => {
-  //   const { email } = req.body;
-  //   const userExists = await model.findOne({ email: email });
-  //   if (!userExists) {
-  //     const newUser = await model.create(req.body);
-  //     return res.status(201).send({ message: 'User successfully created' });
-  //   } else {
-  //     return res.status(409).send({ message: 'User already exists' });
-  //   }
-  // });
-
   static async LoginUser(req, res) {
     const { email, password } = req.body;
-    const userExists = await model.findOne({ email });
+    const userExists = await UserServices.findUser({ email });
     if (userExists) {
       const userIsVerified = userExists.isVerified;
       if (userIsVerified) {
@@ -48,6 +52,8 @@ export default class UserController {
               name: userExists.firstname + ' ' + userExists.lastname,
               email: userExists.email,
               token: token,
+              decoded_token: await TokenHandler.decodeToken(token),
+
             },
           });
         } else {
@@ -59,5 +65,48 @@ export default class UserController {
     } else {
       res.status(404).send({ message: `User with that email doesn't exists` });
     }
+  }
+
+  /**
+   * @param  {object} options
+   * @returns {Promise}
+   * @description returns all users or filtered using options param
+   */
+  static async getAllUsers(req, res) {
+    const allusers = await UserServices.findAllUsers({});
+    if (allusers) {
+      return res.status(200).send({ users: allusers });
+    } else {
+      return res.status(404).send({ message: 'No Users Found' });
+    }
+  }
+
+  // /**
+  //  * @param  {object} options
+  //  * @returns {Promise} any
+  //  * @description returns a single user object basing on the options
+  //  */
+  static async getOneUser(req, res) {
+    const data = { email: req.user.email, _id: req.user.id };
+    const user = await UserServices.findUser({ data });
+    if (user) {
+      return res.status(200).send({ user: user });
+    } else {
+      return res.status(404).send({ message: 'User Not Found' });
+    }
+  }
+
+  //  * @param  {object} data
+  //  * @param {string} id  id of user object to be updated
+  //  * @returns {Promise}
+  //  * @description updates a single user object
+  //  *@
+
+  static async updateUser(req, res) {
+    const data = { ...req.body };
+    const id = req.user.id;
+    const updated = await UserServices.updateUser({ _id: id }, { ...data });
+    // User.update({ _id: id }, { $set: { ...data } });
+    return res.status(200).send({ message: updated });
   }
 }
