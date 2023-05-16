@@ -2,6 +2,7 @@ import User from '../models/userModel.js';
 import asyncHandler from 'express-async-handler';
 import TokenHandler from '../helpers/tokenHandler.js';
 import UserServices from '../services/userServices.js';
+import validateMongoDbId from '../helpers/userHelper.js';
 
 export default class UserController {
   /**
@@ -83,8 +84,8 @@ export default class UserController {
   //  * @description returns a single user object basing on the options
   //  */
   static async getOneUser(req, res) {
-    o;
     const data = { email: req.user.email, _id: req.user.id };
+    validateMongoDbId(res, data._id);
     const user = await UserServices.findUser(data);
     if (user) {
       return res.status(200).send({ user: user });
@@ -102,6 +103,7 @@ export default class UserController {
   static async updateUser(req, res) {
     const data = { ...req.body };
     const id = req.user.id;
+    validateMongoDbId(res, id);
     const updated = await UserServices.updateUser({ _id: id }, { ...data });
     // User.update({ _id: id }, { $set: { ...data } });
     return res.status(200).send({ message: updated });
@@ -110,6 +112,7 @@ export default class UserController {
   // @description: for admin to delete a users account
   static async deleteUser(req, res) {
     const { id } = req.params;
+    validateMongoDbId(res, id);
     try {
       const deletedUser = await UserServices.deleteUser(id);
       return res
@@ -123,6 +126,7 @@ export default class UserController {
   // @description: for user to deactivate their account
   static async deactivateAccount(req, res) {
     const { id } = req.user;
+    validateMongoDbId(res, id);
     try {
       const deletedUser = await UserServices.deleteUser(id);
       return res
@@ -135,6 +139,7 @@ export default class UserController {
 
   static async blockUser(req, res) {
     const { id } = req.params;
+    validateMongoDbId(res, id);
     try {
       const blockUser = await UserServices.updateUser(id, { isBlocked: true });
       if (blockUser) {
