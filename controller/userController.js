@@ -3,6 +3,7 @@ import asyncHandler from 'express-async-handler';
 import TokenHandler from '../helpers/tokenHandler.js';
 import UserServices from '../services/userServices.js';
 
+
 export default class UserController {
   /**
    * @param  {object} req.body
@@ -14,6 +15,7 @@ export default class UserController {
     try {
       const userEmailExists = await UserServices.findUser({ email });
       const userMobileExists = await UserServices.findUser({ mobile });
+
       if (userEmailExists || userMobileExists) {
         const exception = userEmailExists
           ? `User with email ${email} already exists`
@@ -49,6 +51,7 @@ export default class UserController {
               email: userExists.email,
               token: token,
               decoded_token: await TokenHandler.decodeToken(token),
+
             },
           });
         } else {
