@@ -6,6 +6,7 @@ import bodyParser from 'body-parser';
 import authRouter from './routes/authRoutes.js';
 import ErrorHandler from './middleware/errorHandler.js';
 import userRouter from './routes/userRoutes.js';
+import cookieParser from 'cookie-parser';
 
 dotenv.config();
 
@@ -21,6 +22,7 @@ mongoDb()
   .catch((error) => console.log(error));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(cookieParser());
 
 app.use(`${prefix}/user`, authRouter);
 app.use(`${prefix}/users`, userRouter);

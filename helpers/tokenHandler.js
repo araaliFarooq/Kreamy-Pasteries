@@ -17,4 +17,11 @@ export default class TokenHandler {
       return e.message || 'Error decoding token';
     }
   }
+
+  static async generateRefreshToken(payload) {
+    const token = await jwt.sign(payload, config.JWT_SECRETKEY, {
+      expiresIn: '3d',
+    });
+    return token;
+  }
 }

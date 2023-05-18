@@ -43,6 +43,19 @@ export default class UserController {
             id: userExists._id,
             email: userExists.email,
           });
+
+          const refreshToken = await TokenHandler.generateRefreshToken({
+            id: userExists._id,
+            email: userExists.email,
+          });
+          // const updateUserRefreshToken = await UserServices.updateUser(
+          //   { _id: userExists._id },
+          //   { refreshToken: refreshToken }
+          // );
+          res.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            maxAge: 72 * 60 * 60 * 1000,
+          });
           res.status(200).send({
             message: 'Login Successful',
             data: {
