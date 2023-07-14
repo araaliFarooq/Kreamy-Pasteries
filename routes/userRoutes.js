@@ -19,7 +19,6 @@ userRouter.get(
 userRouter.put(
   '/user/profile/put',
   SecureRoute.loginRequired,
-  UserAuthValidator.validateCreateUser,
   UserController.updateUser
 );
 

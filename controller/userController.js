@@ -48,10 +48,10 @@ export default class UserController {
             id: userExists._id,
             email: userExists.email,
           });
-          // const updateUserRefreshToken = await UserServices.updateUser(
-          //   { _id: userExists._id },
-          //   { refreshToken: refreshToken }
-          // );
+          const updateUserRefreshToken = await UserServices.updateUser(
+            userExists._id,
+            { refreshToken: refreshToken }
+          );
           res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
             maxAge: 72 * 60 * 60 * 1000,
@@ -117,9 +117,13 @@ export default class UserController {
     const data = { ...req.body };
     const id = req.user.id;
     validateMongoDbId(res, id);
-    const updated = await UserServices.updateUser({ _id: id }, { ...data });
-    // User.update({ _id: id }, { $set: { ...data } });
-    return res.status(200).send({ message: updated });
+    try {
+      const updated = await UserServices.updateUser(id, { ...data });
+      // User.update({ _id: id }, { $set: { ...data } });
+      return res.status(200).send({ message: updated });
+    } catch (error) {
+      return res.status(400).send({ message: error });
+    }
   }
 
   // @description: for admin to delete a users account
